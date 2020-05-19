@@ -1,9 +1,10 @@
-import React from 'react';
-import ScrollableContainer from './components/ScrollableContainer'
+import React from "react";
+import ScrollableContainer from "./components/ScrollableContainer";
 
 function App() {
   return (
     <div className="App">
+      <ScrollableContainer />
       <ScrollableContainer />
     </div>
   );

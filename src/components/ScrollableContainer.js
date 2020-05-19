@@ -1,91 +1,93 @@
-import React, { PureComponent } from 'react'
-import debounce from 'lodash.debounce'
+import React, { PureComponent } from "react";
+import debounce from "lodash.debounce";
 
 export default class ScrollableContainer extends PureComponent {
   constructor() {
-    super()
+    super();
 
     this.state = {
       items: [...Array(10).keys()],
       hasOverflow: false,
       canScrollLeft: false,
-      canScrollRight: false
-    }
+      canScrollRight: false,
+      canScrollTop: false,
+      canScrollBottom: false
+    };
 
-    this.handleClickAddItem = this.handleClickAddItem.bind(this)
-    this.handleClickRemoveItem = this.handleClickRemoveItem.bind(this)
+    this.handleClickAddItem = this.handleClickAddItem.bind(this);
+    this.handleClickRemoveItem = this.handleClickRemoveItem.bind(this);
 
-    this.checkForOverflow = this.checkForOverflow.bind(this)
-    this.checkForScrollPosition = this.checkForScrollPosition.bind(this)
+    this.checkForOverflow = this.checkForOverflow.bind(this);
+    this.checkForScrollPosition = this.checkForScrollPosition.bind(this);
 
-    this.debounceCheckForOverflow = debounce(this.checkForOverflow, 1000)
+    this.debounceCheckForOverflow = debounce(this.checkForOverflow, 1000);
     this.debounceCheckForScrollPosition = debounce(
       this.checkForScrollPosition,
       200
-    )
+    );
 
-    this.container = null
+    this.container = null;
   }
 
   componentDidMount() {
-    this.checkForOverflow()
-    this.checkForScrollPosition()
+    this.checkForOverflow();
+    this.checkForScrollPosition();
 
     this.container.addEventListener(
-      'scroll',
+      "scroll",
       this.debounceCheckForScrollPosition
-    )
+    );
   }
 
   componentWillUnmount() {
     this.container.removeEventListener(
-      'scroll',
+      "scroll",
       this.debounceCheckForScrollPosition
-    )
-    this.debounceCheckForOverflow.cancel()
+    );
+    this.debounceCheckForOverflow.cancel();
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.items.length !== this.state.items.length) {
-      this.checkForOverflow()
-      this.checkForScrollPosition()
+      this.checkForOverflow();
+      this.checkForScrollPosition();
     }
   }
 
   checkForScrollPosition() {
-    const { scrollLeft, scrollWidth, clientWidth } = this.container
-
+    const { scrollTop, scrollHeight, clientHeight } = this.container;
+    debugger;
     this.setState({
-      canScrollLeft: scrollLeft > 0,
-      canScrollRight: scrollLeft !== scrollWidth - clientWidth
-    })
+      canScrollTop: scrollTop > 0,
+      canScrollBottom: scrollTop !== scrollHeight - clientHeight
+    });
   }
 
   checkForOverflow() {
-    const { scrollWidth, clientWidth } = this.container
-    const hasOverflow = scrollWidth > clientWidth
+    const { scrollHeight, clientHeight } = this.container;
+    const hasOverflow = scrollHeight > clientHeight;
 
-    this.setState({ hasOverflow })
+    this.setState({ hasOverflow });
   }
 
   handleClickAddItem() {
     this.setState(state => {
       return {
         items: [...state.items, state.items.length]
-      }
-    })
+      };
+    });
   }
 
   handleClickRemoveItem() {
     this.setState(state => {
       return {
         items: state.items.slice(0, -1)
-      }
-    })
+      };
+    });
   }
 
   scrollContainerBy(distance) {
-    this.container.scrollBy({ left: distance, behavior: 'smooth' })
+    this.container.scrollBy({ top: distance, behavior: "smooth" });
   }
 
   buildItems() {
@@ -94,19 +96,19 @@ export default class ScrollableContainer extends PureComponent {
         <li className="item" key={item}>
           {item + 1}
         </li>
-      )
-    })
+      );
+    });
   }
 
   buildControls() {
-    const { canScrollLeft, canScrollRight } = this.state
+    const { canScrollTop, canScrollBottom } = this.state;
     return (
       <div className="item-controls">
         <button
           type="button"
-          disabled={!canScrollLeft}
+          disabled={!canScrollTop}
           onClick={() => {
-            this.scrollContainerBy(-200)
+            this.scrollContainerBy(-200);
           }}
         >
           Previous
@@ -122,15 +124,15 @@ export default class ScrollableContainer extends PureComponent {
 
         <button
           type="button"
-          disabled={!canScrollRight}
+          disabled={!canScrollBottom}
           onClick={() => {
-            this.scrollContainerBy(200)
+            this.scrollContainerBy(200);
           }}
         >
           Next
         </button>
       </div>
-    )
+    );
   }
 
   render() {
@@ -139,13 +141,12 @@ export default class ScrollableContainer extends PureComponent {
         <ul
           className="item-container"
           ref={node => {
-            this.container = node
+            this.container = node;
           }}
         >
           {this.buildItems()}
         </ul>
-        {this.buildControls()}
       </>
-    )
+    );
   }
 }
